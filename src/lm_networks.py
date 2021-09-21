@@ -41,9 +41,14 @@ class LandmarkBranchUpsample(nn.Module):
         # lm_pos_map = F.sigmoid(x)
         lm_pos_map = x
         batch_size, _, pred_h, pred_w = lm_pos_map.size()
-        lm_pos_reshaped = lm_pos_map.reshape(batch_size, 8, -1)
-        # y是高上的坐标，x是宽上的坐标
+        lm_pos_reshaped = lm_pos_map.reshape(batch_size, 8, -1) # [bs, 8(landmark),  feature_map_size]
+        
+        # https://pythonq.com/so/python/173212
+        # np.unravel_index의 첫번째 값=torch.argmax(lm_pos_reshaped, dim=2))의 (pred_h, pred_w) 가준에서의 위치(x, y)
+        # conv feature map에서 젤 큰 값을 가지는 x, y 위치값을 가져온다.
         lm_pos_y, lm_pos_x = np.unravel_index(torch.argmax(lm_pos_reshaped, dim=2), (pred_h, pred_w))
+        
+        # 가져온 위치를 feature map 크기로 나누어 0~1사이값의 노말값으로 변환한다.
         lm_pos_output = np.stack([lm_pos_x / (pred_w - 1), lm_pos_y / (pred_h - 1)], axis=2)
 
         return lm_pos_map, lm_pos_output
