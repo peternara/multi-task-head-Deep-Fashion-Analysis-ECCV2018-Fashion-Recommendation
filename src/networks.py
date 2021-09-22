@@ -39,6 +39,9 @@ class WholeNetwork(ModuleWithAttr):
         batch_size, channel_num, image_h, image_w = sample['image'].size()
         vgg16_output = self.vgg16_extractor(sample['image'])
         vgg16_for_lm = vgg16_output[const.LM_SELECT_VGG]
+        
+        # lm_pos_output : keypoint predict한 0~1사이의 노멀한 x, y
+        #  lm_pos_map : landmark network 마지막 feature map
         lm_pos_map, lm_pos_output = self.lm_branch(vgg16_for_lm)
 
         lm_merge_map, _ = lm_pos_map.max(dim=1, keepdim=True)
